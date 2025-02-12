@@ -1,6 +1,6 @@
 # Cloudflare-IPV6-Script
 DDNS auto update to Cloudflare.</p>
-Only using AWK,curl.</p>
+Only using **awk**,**curl**.</p>
 simple not need python or jq.</p>
 
 ## JSON format is sensitive...
