@@ -17,6 +17,10 @@ only supoort this.</p>
 bash ./ddns_v6.sh
 ```
 depends on your shell.</p>
+and you may add it to crontab :
+1. `crontab -e`
+2. `shift + g`
+3. input `* * * * * /roo/tddns_v6.sh`
 ## Force Update to Cloudflare
 ```
 bash ./ddns_v6.sh -f
