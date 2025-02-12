@@ -1,15 +1,16 @@
 #!/bin/bash
 
+#API设置
+API="Your API TOKEN"
+SUBDOMAIN="Your Sub Domain"
+TYPE="AAAA"
+
+#获取现在的IPV6
 CURRENT_IP=$(ip addr | grep inet6 \
     | grep global | grep -v 'fd' \
     | grep -v 'fc'|awk '{print $2}' \
     | awk -F '/' '{print $1}'|awk 'NR==1{print; exit}'
     )
-
-#API设置
-API="Your API TOKEN"
-SUBDOMAIN="Your Sub Domain"
-TYPE="AAAA"
 
 CLOUDFLARE_DNS(){
     #获取指定域名的zone id
@@ -58,7 +59,8 @@ CLOUDFLARE_DNS(){
     fi
 }
 
-#获取现在的IPV6
+#输出现在的IPV6
+date
 echo $CURRENT_IP -- ipv6 now
 #获取以前存储的IPV6
 SAVED_IP=$(awk 'NR==1{print; exit}' ddns_v6.log)
