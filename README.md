@@ -21,7 +21,10 @@ and you may add it to crontab :
 1. `crontab -e`
 2. `shift + g`
 3. insert `i`, input `* * * * * bash /roo/tddns_v6.sh`
-</p>*. if you wanna make running log`* * * * * bash /root/ddns_v6.sh >> /root/ddns_v6_running.log 2>&1`
+</p>*if you wanna make running log*
+```
+* * * * * bash /root/ddns_v6.sh >> /root/ddns_v6_running.log 2>&1
+```
 ## Force Update to Cloudflare
 ```
 bash ./ddns_v6.sh -f
