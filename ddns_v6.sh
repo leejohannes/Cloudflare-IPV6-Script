@@ -52,10 +52,12 @@ CLOUDFLARE_DNS(){
         }")
     echo -e "\e[1;91m=========================\e[0m"
     local a=$(echo $UPDATE_RESPONSE | awk -F '"success":' '{print($2)}'|awk -F',' '{print $1}')
-    echo "success":$a
     if [ "$a" == "true" ];then
         echo $CURRENT_IP > ddns_v6.log
         echo 1 >> ddns_v6.log
+        echo "success":$a
+    else
+        echo "fail"
     fi
 }
 
@@ -66,18 +68,25 @@ echo $CURRENT_IP -- ipv6 now
 SAVED_IP=$(awk 'NR==1{print; exit}' ddns_v6.log)
 echo $SAVED_IP -- ipv6 before
 #判断是否相同
-if [ "$SAVED_IP" == "$CURRENT_IP" ];then
-    echo same
-    #读取第二行查看是否同步了
-    SYN_STATUS=$(sed -n '2p' ddns_v6.log)
-    if [ "$SYN_STATUS" == "1" ]; then
-        echo -e "SYNED \nNo need update\nAdd \e[91m-f\e[0m to force update"
+if [ -z "$CURRENT_IP"];then
+    echo No WAN IPV6
+else
+    if [ "$SAVED_IP" == "$CURRENT_IP" ];then
+        echo same
+        #读取第二行查看是否同步了
+        SYN_STATUS=$(sed -n '2p' ddns_v6.log)
+        if [ "$SYN_STATUS" == "1" ]; then
+            echo -e "SYNED \nNo need update\nAdd \e[91m-f\e[0m to force update"
+        else
+            echo not SYNED
+            CLOUDFLARE_DNS
+        fi
     else
-        echo not SYNED
+        echo not same
         CLOUDFLARE_DNS
     fi
-else
-    echo not same
+fi
+if [ "$1" == "-f" ];then
     CLOUDFLARE_DNS
 fi
 if [ "$1" == "-f" ];then
