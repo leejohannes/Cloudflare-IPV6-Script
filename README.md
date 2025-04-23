@@ -38,5 +38,4 @@ if not same or dont have will start synchronizing:
 3. update DNS recorder
 
 ## issue GET DNS record part using awk still got problem... 
-change with jq
-
+if got problem can comment `CLOUDFLARE_DNS()` move `:<<EOF` `EOF` from `jq` part to  `awk` part 
