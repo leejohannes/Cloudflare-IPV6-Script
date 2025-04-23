@@ -37,5 +37,6 @@ if not same or dont have will start synchronizing:
 2. check DNS recorders
 3. update DNS recorder
 
-
+## issue GET DNS record part using awk still got problem... 
+change with jq
 
