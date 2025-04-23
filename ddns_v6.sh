@@ -1,8 +1,8 @@
 #!/bin/bash
 
 #API设置
-API="Your API TOKEN"
-SUBDOMAIN="Your Sub Domain"
+API="m7WYdaqBPaF4YKU9GAPWe813CRJ96uwLM1vI0jAD"
+SUBDOMAIN="s"
 TYPE="AAAA"
 
 #获取现在的IPV6
@@ -30,13 +30,25 @@ CLOUDFLARE_DNS(){
     local RECORD_RESPONSE=$(curl -s -X GET "$RECORD_API_URL" \
             -H "Authorization: Bearer $API" \
             -H "Content-Type: application/json")
-    local a="awk -F'\"name\":\"$RECORD_NAME\"' '{print \$2}' | awk -F'\"type\":\"$TYPE\"' '{print \$2}' | awk -F'\"content\":\"' '{print \$2}' | awk -F'\"' '{print \$1}'"
-    local CONTENT=$(echo "$RECORD_RESPONSE" | eval "$a")
+#    local a="awk -F'\"name\":\"$RECORD_NAME\"' '{print \$2}' | awk -F'\"type\":\"$TYPE\"' '{print \$2}' | awk -F'\"content\":\"' '{print \$2}' | awk -F'\"' '{print \$1}'"
+#    local CONTENT=$(echo "$RECORD_RESPONSE" | eval "$a")
+    CONTENT=$(echo "$RECORD_RESPONSE" | jq -r \
+     --arg record_name "$RECORD_NAME" \
+     --arg record_type "$TYPE" \
+     '.result[]
+     | select(.name == $record_name and .type == $record_type)
+     | .content')
+    RECORD_ID=$(echo "$RECORD_RESPONSE" | jq -r \
+    --arg record_name "$RECORD_NAME" \
+    --arg record_type "$TYPE" \
+    '.result[]
+    | select(.name == $record_name and .type == $record_type)
+    | .id')
     echo DNS Record : $CONTENT
     #a="awk -F'\"name\":\"$RECORD_NAME\"' '{print \$0}' | awk -F'\"id\":\"' '{print \$2}' | awk -F'\"' '{print \$1}'F"
-    local a="awk -F'\",\"name\":\"$RECORD_NAME\"' '{print \$1}'"
-    local RECORD_ID=$(echo "$RECORD_RESPONSE" | eval "$a")
-    local RECORD_ID=${RECORD_ID:0-32}
+#    local a="awk -F'\",\"name\":\"$RECORD_NAME\"' '{print \$1}'"
+#    local RECORD_ID=$(echo "$RECORD_RESPONSE" | eval "$a")
+#    local RECORD_ID=${RECORD_ID:0-32}
     echo Record ID : $RECORD_ID
 
     #更新指定域名的DNS记录
@@ -58,6 +70,7 @@ CLOUDFLARE_DNS(){
         echo "success":$a
     else
         echo "fail"
+        echo $UPDATE_RESPONSE
     fi
 }
 
@@ -68,7 +81,7 @@ echo $CURRENT_IP -- ipv6 now
 SAVED_IP=$(awk 'NR==1{print; exit}' ddns_v6.log)
 echo $SAVED_IP -- ipv6 before
 #判断是否相同
-if [ -z "$CURRENT_IP"];then
+if [ -z "$CURRENT_IP" ];then
     echo No WAN IPV6
 else
     if [ "$SAVED_IP" == "$CURRENT_IP" ];then
@@ -85,9 +98,6 @@ else
         echo not same
         CLOUDFLARE_DNS
     fi
-fi
-if [ "$1" == "-f" ];then
-    CLOUDFLARE_DNS
 fi
 if [ "$1" == "-f" ];then
     CLOUDFLARE_DNS
