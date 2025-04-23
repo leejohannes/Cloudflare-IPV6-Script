@@ -30,8 +30,14 @@ CLOUDFLARE_DNS(){
     local RECORD_RESPONSE=$(curl -s -X GET "$RECORD_API_URL" \
             -H "Authorization: Bearer $API" \
             -H "Content-Type: application/json")
-#    local a="awk -F'\"name\":\"$RECORD_NAME\"' '{print \$2}' | awk -F'\"type\":\"$TYPE\"' '{print \$2}' | awk -F'\"content\":\"' '{print \$2}' | awk -F'\"' '{print \$1}'"
-#    local CONTENT=$(echo "$RECORD_RESPONSE" | eval "$a")
+    #awk办法，如果有问题改去JQ
+    local a="awk -F'\"name\":\"$RECORD_NAME\",\"type\":\"$TYPE\"' '{print \$2}'| awk -F'\"content\":\"' '{print \$2}' | awk -F'\"' '{print \$1}'"
+    local CONTENT=$(echo "$RECORD_RESPONSE" | eval "$a")
+    local a="awk -F'\",\"name\":\"$RECORD_NAME\",\"type\":\"$TYPE\"' '{print \$1}'"
+    local RECORD_ID=$(echo "$RECORD_RESPONSE" | eval "$a")
+    local RECORD_ID=${RECORD_ID:0-32}
+    #如果awk有问题用JQ临时代替下
+:<<EOF
     CONTENT=$(echo "$RECORD_RESPONSE" | jq -r \
      --arg record_name "$RECORD_NAME" \
      --arg record_type "$TYPE" \
@@ -44,11 +50,8 @@ CLOUDFLARE_DNS(){
     '.result[]
     | select(.name == $record_name and .type == $record_type)
     | .id')
+EOF
     echo DNS Record : $CONTENT
-    #a="awk -F'\"name\":\"$RECORD_NAME\"' '{print \$0}' | awk -F'\"id\":\"' '{print \$2}' | awk -F'\"' '{print \$1}'F"
-#    local a="awk -F'\",\"name\":\"$RECORD_NAME\"' '{print \$1}'"
-#    local RECORD_ID=$(echo "$RECORD_RESPONSE" | eval "$a")
-#    local RECORD_ID=${RECORD_ID:0-32}
     echo Record ID : $RECORD_ID
 
     #更新指定域名的DNS记录
