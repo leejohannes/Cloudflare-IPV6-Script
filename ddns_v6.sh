@@ -90,11 +90,11 @@ else
     if [ "$SAVED_IP" == "$CURRENT_IP" ];then
         echo same
         #读取第二行查看是否同步了
-        SYN_STATUS=$(sed -n '2p' ddns_v6.log)
+        SYN_STATUS=$(awk 'NR==2{print; exit}' ddns_v6.log)
         if [ "$SYN_STATUS" == "1" ]; then
             echo -e "SYNED \nNo need update\nAdd \e[91m-f\e[0m to force update"
         else
-            echo not SYNED
+            echo !!!not SYNED, Got prolem!!!
             CLOUDFLARE_DNS
         fi
     else
@@ -103,5 +103,9 @@ else
     fi
 fi
 if [ "$1" == "-f" ];then
+    if [ ! -z "$2" ];then
+    echo Pointed IP: "$2"
+    CURRENT_IP="$2"
+    fi
     CLOUDFLARE_DNS
 fi
